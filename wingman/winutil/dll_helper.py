@@ -23,8 +23,8 @@ SetLastError.argtypes = [DWORD]
 
 
 def _clear_last_error_before(func):
-    """Returns a wrapper function which will clear the ctypes local
-    copy of ``LastError`` before calling ``func``.
+    """Returns a wrapper function which will clear ``LastError`` before
+    calling ``func``.
     """
     def wrapper(*args, **kwargs):
         SetLastError(0)
