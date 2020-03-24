@@ -52,9 +52,9 @@ def get_func(name, restype, args, ret_val_assertion=None,
 
     :param name: The name of the DLL function.
     :param restype: The return type of the function.
-    :param args: A tuple of tuples of the form
-        ``(param_type, flags, param_name, default_value)``. The last
-        three elements of each tuple are optional; see
+    :param args: The function parameters, specified as a list of tuples
+        in the form ``(param_type, flags, param_name, default_value)``.
+        The last three elements of each tuple are optional; see
         `ctypes paramflags <https://docs.python.org/3/library/ctypes.html#function-prototypes>`
         for details.
     :param ret_val_assertion: A callable which returns false if the DLL
