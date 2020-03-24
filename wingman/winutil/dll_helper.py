@@ -34,7 +34,7 @@ def _clear_last_error_before(func):
 
 def _errcheck(result, func, args):
     if not func.ret_val_assertion(result): # return value could indicate error
-        if func.use_last_error: # LastError should be consulted
+        if func.check_last_error: # LastError should be consulted
             last_error = GetLastError()
             if last_error != 0:
                 msg = "{}: {} ({})"
@@ -46,7 +46,8 @@ def _errcheck(result, func, args):
     return result
 
 
-def get_func(name, restype, args, ret_val_assertion=None, use_last_error=True):
+def get_func(name, restype, args, ret_val_assertion=None,
+        check_last_error=True):
     """Return a function pointer to a system DLL function.
 
     :param name: The name of the DLL function.
@@ -60,12 +61,11 @@ def get_func(name, restype, args, ret_val_assertion=None, use_last_error=True):
         function's return value could indicate an error condition. If
         so, the Windows ``LastError`` variable is used to determine if
         an error occurred, and an ``OSError`` is raised if appropriate.
-    :param use_last_error: If False, ``LastError`` will not be checked
+    :param check_last_error: If False, ``LastError`` will not be checked
         to determine whether an error occurred. (Some functions do not
         use ``LastError`` to indicate error conditions.) In this case,
         ``ret_val_assertion`` alone will be used to determine whether
         an exception is raised.
-
     """
 
     # find first DLL which has a function with this name
@@ -95,7 +95,7 @@ def get_func(name, restype, args, ret_val_assertion=None, use_last_error=True):
     # set function attributes for _errcheck
     func.name = name
     func.ret_val_assertion = ret_val_assertion
-    func.use_last_error = use_last_error
+    func.check_last_error = check_last_error
 
     # enable error checking for function if error condition defined
     if ret_val_assertion is not None:
@@ -106,7 +106,7 @@ def get_func(name, restype, args, ret_val_assertion=None, use_last_error=True):
             func.errcheck = _errcheck
 
     # if function uses LastError, clear it before calling the function
-    if use_last_error:
+    if check_last_error:
         return _clear_last_error_before(func)
     else:
         return func

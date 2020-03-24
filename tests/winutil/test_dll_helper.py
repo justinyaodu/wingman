@@ -9,7 +9,7 @@ class TestDllHelper(unittest.TestCase):
     def setUp(self):
         # function to get a handle to the desktop window
         self.GetDesktopWindow = dll_helper.get_func("GetDesktopWindow", HWND,
-                None, lambda r: r is not None, use_last_error=False)
+                None, lambda r: r is not None, check_last_error=False)
         
         # get the desktop window HWND to use in later tests
         self.desktop_hwnd = self.GetDesktopWindow()
