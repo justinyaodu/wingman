@@ -7,11 +7,11 @@ __all__ = ['OpenClipboard', 'CloseClipboard', 'EmptyClipboard',
 from ctypes import *
 from ctypes.wintypes import *
 
-from wingman.winutil import dll_helper
+from wingman.winutil import dllhelper
 
 
 # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-openclipboard
-OpenClipboard = dll_helper.get_func('OpenClipboard', BOOL,
+OpenClipboard = dllhelper.get_func('OpenClipboard', BOOL,
         [
             (HWND, 1, 'owner_hwnd'),
         ],
@@ -19,19 +19,19 @@ OpenClipboard = dll_helper.get_func('OpenClipboard', BOOL,
 
 
 # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-closeclipboard
-CloseClipboard = dll_helper.get_func('CloseClipboard', BOOL,
+CloseClipboard = dllhelper.get_func('CloseClipboard', BOOL,
         None,
         int(0).__ne__)
 
 
 # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-emptyclipboard
-EmptyClipboard = dll_helper.get_func('EmptyClipboard', BOOL,
+EmptyClipboard = dllhelper.get_func('EmptyClipboard', BOOL,
         None,
         int(0).__ne__)
 
 
 # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumclipboardformats
-EnumClipboardFormats = dll_helper.get_func('EnumClipboardFormats', UINT,
+EnumClipboardFormats = dllhelper.get_func('EnumClipboardFormats', UINT,
         [
             (UINT, 1, 'format'),
         ],
@@ -39,7 +39,7 @@ EnumClipboardFormats = dll_helper.get_func('EnumClipboardFormats', UINT,
 
 
 # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardformatnamew
-GetClipboardFormatNameW = dll_helper.get_func('GetClipboardFormatNameW', c_int,
+GetClipboardFormatNameW = dllhelper.get_func('GetClipboardFormatNameW', c_int,
         [
             (UINT, 1, 'format'),
             (LPWSTR, 1, 'name_buf'),
@@ -49,7 +49,7 @@ GetClipboardFormatNameW = dll_helper.get_func('GetClipboardFormatNameW', c_int,
 
 
 # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerclipboardformatw
-RegisterClipboardFormatW = dll_helper.get_func('RegisterClipboardFormatW', UINT,
+RegisterClipboardFormatW = dllhelper.get_func('RegisterClipboardFormatW', UINT,
         [
             (LPCWSTR, 1, 'format_name')
         ],
@@ -57,7 +57,7 @@ RegisterClipboardFormatW = dll_helper.get_func('RegisterClipboardFormatW', UINT,
 
 
 # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboarddata
-GetClipboardData = dll_helper.get_func('GetClipboardData', HANDLE,
+GetClipboardData = dllhelper.get_func('GetClipboardData', HANDLE,
         [
             (UINT, 1, 'format')
         ],
@@ -65,7 +65,7 @@ GetClipboardData = dll_helper.get_func('GetClipboardData', HANDLE,
 
 
 # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setclipboarddata
-SetClipboardData = dll_helper.get_func('SetClipboardData', HANDLE,
+SetClipboardData = dllhelper.get_func('SetClipboardData', HANDLE,
         [
             (UINT, 1, 'format'),
             (HANDLE, 1, 'data_handle')
