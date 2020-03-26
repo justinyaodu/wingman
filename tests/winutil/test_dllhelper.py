@@ -2,13 +2,13 @@ import unittest
 from ctypes import *
 from ctypes.wintypes import *
 
-from wingman.winutil import dll_helper
+from wingman.winutil import dllhelper
 
 
 class TestDllHelper(unittest.TestCase):
     def setUp(self):
         # function to get a handle to the desktop window
-        self.GetDesktopWindow = dll_helper.get_func("GetDesktopWindow", HWND,
+        self.GetDesktopWindow = dllhelper.get_func("GetDesktopWindow", HWND,
                 None, lambda r: r is not None, check_last_error=False)
         
         # get the desktop window HWND to use in later tests
@@ -20,7 +20,7 @@ class TestDllHelper(unittest.TestCase):
 
         # function to get the name of a window
         # supply argument names and default parameters
-        self.GetWindowTextW = dll_helper.get_func("GetWindowTextW", c_int,
+        self.GetWindowTextW = dllhelper.get_func("GetWindowTextW", c_int,
                 (
                     (HWND, 1, "hWnd", self.desktop_hwnd),
                     (LPWSTR, 1, "lpString", self.buffer),
@@ -30,7 +30,7 @@ class TestDllHelper(unittest.TestCase):
 
     def test_nonexistent_function_name(self):
         with self.assertRaises(NameError):
-            dll_helper.get_func("NonexistentFunction", None, None)
+            dllhelper.get_func("NonexistentFunction", None, None)
 
     def test_parameter_type_check(self):
         # pass in a float instead of a HWND
