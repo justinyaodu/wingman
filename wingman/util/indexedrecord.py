@@ -1,29 +1,24 @@
 from collections import defaultdict
 
-class IndexedRecordMeta(type):
-    """Metaclass which adds class variables unique to each subclass of
-    IndexedRecord.
+class IndexedRecord:
+    """A base class which implements functionality for indexing class
+    instances by their attribute values.
     """
-    def __new__(class_, name, bases, dict_):
-        subclass = super().__new__(class_, name, bases, dict_)
+    
+    @classmethod
+    def __init_subclass__(subclass, /, indexed_attrs, **kwargs):
+        super().__init_subclass__(**kwargs)
 
         # map attribute values to subclass instances
         # indexed by [attr_name][attr_value]
         subclass._instances = defaultdict(dict)
 
         # names of indexed attributes (specified by subclasses)
-        subclass._indexed_attr_names = []
+        subclass._indexed_attrs = indexed_attrs
 
         # functions to create new instances from an attribute value
         # (used when a lookup fails because no corresponding instance exists)
         subclass._create_from_attr = {}
-
-        return subclass
-
-class IndexedRecord(metaclass=IndexedRecordMeta):
-    """A base class which implements functionality for indexing class
-    instances by their attribute values.
-    """
 
     @classmethod
     def _get_by_attr(subclass, attr_name, attr_value, create_if_absent=True):
@@ -40,6 +35,8 @@ class IndexedRecord(metaclass=IndexedRecordMeta):
         specified for ``attr_name`` in ``create_from_attr``, a
         ``KeyError`` is raised.
         """
+        if attr_name not in subclass._indexed_attrs:
+            raise ValueError
         if attr_value is None:
             raise ValueError
         existing = subclass._instances[attr_name].get(attr_value)
@@ -70,9 +67,9 @@ class IndexedRecord(metaclass=IndexedRecordMeta):
 
     def __init__(self):
         """Use this instance's values for each attribute in
-        ``_indexed_attr_names`` to index this instance. This method
-        should be called after those instance values are initialized.
+        ``_indexed_attrs`` to index this instance. This method should be
+        called after those instance values are initialized.
         """
-        for attr_name in type(self)._indexed_attr_names:
-            _set_by_attr(attr_name, self[attr_name], self)
+        for attr_name in type(self)._indexed_attrs:
+            type(self)._set_by_attr(attr_name, getattr(self, attr_name), self)
 
