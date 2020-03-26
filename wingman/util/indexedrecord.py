@@ -6,22 +6,15 @@ class IndexedRecord:
     """
     
     @classmethod
-    def __init_subclass__(subclass, /, indexed_attrs, **kwargs):
+    def __init_subclass__(subclass, **kwargs):
         super().__init_subclass__(**kwargs)
 
         # map attribute values to subclass instances
         # indexed by [attr_name][attr_value]
         subclass._instances = defaultdict(dict)
 
-        # names of indexed attributes (specified by subclasses)
-        subclass._indexed_attrs = indexed_attrs
-
-        # functions to create new instances from an attribute value
-        # (used when a lookup fails because no corresponding instance exists)
-        subclass._create_from_attr = {}
-
     @classmethod
-    def _get_by_attr(subclass, attr_name, attr_value, create_if_absent=True):
+    def _get_by_attr(subclass, attr_name, attr_value, create_if_absent=False):
         """Return the subclass instance which corresponds to a value of
         ``attr_value`` for the attribute specified by ``attr_name``.
         If no such instance exists, the result depends on the value of
