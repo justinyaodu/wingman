@@ -36,20 +36,21 @@ def copy_to_global(data, encoding=None):
         if encoding is None:
             msg = "An encoding must be specified for string data"
             raise ValueError(msg)
+        elif _is_wide_encoding(encoding):
+            data = create_unicode_buffer(data)
         else:
-            data = data.encode(encoding)
-    return _copy_bytes_to_global(data)
+            data = create_string_buffer(data.encode(encoding))
+    elif isinstance(data, bytes):
+        size = len(data) # don't need a null terminator for binary data
+        data = create_string_buffer(data, size=size)
+    else:
+        msg = "Expected string or bytes object; got '{}'"
+        raise TypeError(msg.format(type(data).__name__))
 
-
-def _copy_bytes_to_global(data):
-    """Copy a bytes object to global memory and return its handle."""
-    if not isinstance(data, bytes):
-        msg = "Expected bytes object, got '{}'"
-        raise TypeError(msg.format(type(data)))
-
-    handle = GlobalAlloc(GMEM.MOVEABLE, len(data))
+    size = sizeof(data)
+    handle = GlobalAlloc(GMEM.MOVEABLE, size)
     with _GlobalPointer(handle) as ptr:
-        memmove(ptr, data, len(data))
+        memmove(ptr, data, size)
     return handle
 
 
@@ -60,11 +61,11 @@ def copy_from_global(handle, encoding=None):
     """
     with _GlobalPointer(handle) as ptr:
         if encoding is None: # return bytes object
-            return string_at(ptr, size_of(handle))
+            return string_at(ptr, size=size_of(handle))
         elif '16' in encoding: # return wide character string
             return wstring_at(ptr)
         else: # return decoded bytes object
-            return string_at(ptr, size_of(handle)).decode(encoding)
+            return string_at(ptr).decode(encoding)
 
 
 def free(handle):
