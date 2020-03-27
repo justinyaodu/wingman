@@ -13,7 +13,7 @@ from wingman.winutil import dllhelper
 # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-openclipboard
 OpenClipboard = dllhelper.get_func('OpenClipboard', BOOL,
         [
-            (HWND, 1, 'owner_hwnd'),
+            (HWND, 1, 'owner_hwnd')
         ],
         int(0).__ne__)
 
@@ -33,7 +33,7 @@ EmptyClipboard = dllhelper.get_func('EmptyClipboard', BOOL,
 # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumclipboardformats
 EnumClipboardFormats = dllhelper.get_func('EnumClipboardFormats', UINT,
         [
-            (UINT, 1, 'format'),
+            (UINT, 1, 'format')
         ],
         int(0).__ne__)
 
