@@ -11,7 +11,10 @@ class Fruit(IndexedRecord):
     }
 
     def __init__(self, name):
-        self.first_letter = name[0]
+        if len(name) > 0:
+            self.first_letter = name[0]
+        else:
+            self.first_letter = None
         self.name = name
         super().__init__()
 
@@ -54,4 +57,7 @@ class TestIndexedRecord(unittest.TestCase):
         tangerine = Fruit('tangerine')
         Fruit._set_by_attr('name', 'clementine', tangerine)
         self.assertEqual(tangerine, Fruit._get_by_attr('name', 'clementine'))
+
+    def test_create_attr_value_none(self):
+        empty = Fruit('')
 

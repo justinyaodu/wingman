@@ -64,5 +64,7 @@ class IndexedRecord:
         called after those instance values are initialized.
         """
         for attr_name in type(self)._indexed_attrs:
-            type(self)._set_by_attr(attr_name, getattr(self, attr_name), self)
+            attr_value = getattr(self, attr_name)
+            if attr_value is not None:
+                type(self)._set_by_attr(attr_name, attr_value, self)
 
