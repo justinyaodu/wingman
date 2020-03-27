@@ -6,15 +6,15 @@ class IndexedRecord:
     """
     
     @classmethod
-    def __init_subclass__(subclass, **kwargs):
+    def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
 
         # map attribute values to subclass instances
         # indexed by [attr_name][attr_value]
-        subclass._instances = defaultdict(dict)
+        cls._instances = defaultdict(dict)
 
     @classmethod
-    def _get_by_attr(subclass, attr_name, attr_value, create_if_absent=False):
+    def _get_by_attr(cls, attr_name, attr_value, create_if_absent=False):
         """Return the subclass instance which corresponds to a value of
         ``attr_value`` for the attribute specified by ``attr_name``.
         If no such instance exists, the result depends on the value of
@@ -28,15 +28,15 @@ class IndexedRecord:
         specified for ``attr_name`` in ``create_from_attr``, a
         ``KeyError`` is raised.
         """
-        if attr_name not in subclass._indexed_attrs:
+        if attr_name not in cls._indexed_attrs:
             raise ValueError
         if attr_value is None:
             raise ValueError
-        existing = subclass._instances[attr_name].get(attr_value)
+        existing = cls._instances[attr_name].get(attr_value)
         if existing is not None:
             return existing
         elif create_if_absent:
-            create_func = subclass._create_from_attr.get(attr_name)
+            create_func = cls._create_from_attr.get(attr_name)
             if create_func is not None:
                 return create_func(attr_value)
             else:
@@ -45,7 +45,7 @@ class IndexedRecord:
             raise KeyError
 
     @classmethod
-    def _set_by_attr(subclass, attr_name, attr_value, instance):
+    def _set_by_attr(cls, attr_name, attr_value, instance):
         """Indicate that a value of ``attr_value`` for the attribute
         ``attr_name`` corresponds to the subclass instance
         ``instance``. If ``attr_value`` is ``None``, or there is
@@ -54,9 +54,9 @@ class IndexedRecord:
         """
         if attr_value is None:
             raise ValueError
-        if subclass._instances[attr_name].get(attr_value) is not None:
+        if cls._instances[attr_name].get(attr_value) is not None:
             raise ValueError
-        subclass._instances[attr_name][attr_value] = instance
+        cls._instances[attr_name][attr_value] = instance
 
     def __init__(self):
         """Use this instance's values for each attribute in
