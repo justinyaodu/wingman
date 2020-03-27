@@ -2,7 +2,7 @@
 
 __all__ = ['size_of', 'copy_to_global', 'copy_from_global', 'free']
 
-from ctypes import *
+import ctypes
 
 from ._globalmemapi import *
 
@@ -27,6 +27,13 @@ def size_of(handle):
     return GlobalSize(handle)
 
 
+def _is_wide_encoding(encoding):
+    """Check whether an encoding (represented by a string) is a wide
+    character encoding.
+    """
+    return '16' in encoding
+
+
 def copy_to_global(data, encoding=None):
     """Copy a string or bytes object to global memory, and return a
     handle to the allocated memory. If ``data`` is a string,
@@ -37,20 +44,20 @@ def copy_to_global(data, encoding=None):
             msg = "An encoding must be specified for string data"
             raise ValueError(msg)
         elif _is_wide_encoding(encoding):
-            data = create_unicode_buffer(data)
+            data = ctypes.create_unicode_buffer(data)
         else:
-            data = create_string_buffer(data.encode(encoding))
+            data = ctypes.create_string_buffer(data.encode(encoding))
     elif isinstance(data, bytes):
         size = len(data) # don't need a null terminator for binary data
-        data = create_string_buffer(data, size=size)
+        data = ctypes.create_string_buffer(data, size=size)
     else:
         msg = "Expected string or bytes object; got '{}'"
         raise TypeError(msg.format(type(data).__name__))
 
-    size = sizeof(data)
+    size = ctypes.sizeof(data)
     handle = GlobalAlloc(GMEM.MOVEABLE, size)
     with _GlobalPointer(handle) as ptr:
-        memmove(ptr, data, size)
+        ctypes.memmove(ptr, data, size)
     return handle
 
 
@@ -61,11 +68,11 @@ def copy_from_global(handle, encoding=None):
     """
     with _GlobalPointer(handle) as ptr:
         if encoding is None: # return bytes object
-            return string_at(ptr, size=size_of(handle))
-        elif '16' in encoding: # return wide character string
-            return wstring_at(ptr)
+            return ctypes.string_at(ptr, size=size_of(handle))
+        elif _is_wide_encoding(encoding): # return wide character string
+            return ctypes.wstring_at(ptr)
         else: # return decoded bytes object
-            return string_at(ptr).decode(encoding)
+            return ctypes.string_at(ptr).decode(encoding)
 
 
 def free(handle):
