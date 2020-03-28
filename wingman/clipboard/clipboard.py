@@ -1,6 +1,8 @@
 """System clipboard interface."""
 
-from abc import ABC
+__all__ = ['Clipboard', 'selection', 'primary', 'secondary']
+
+from abc import ABC, abstractmethod
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -18,6 +20,7 @@ class Clipboard(ABC):
 
     def __init__(self):
         # configurable maximum size for objects transferred to/from clipboard
+        # used by subclasses
         self.max_data_size = 64 * 1024 * 1024
 
     @abstractmethod
@@ -43,23 +46,23 @@ class Clipboard(ABC):
         object, depending on the format. None is returned if none of
         the requested formats are available.
         """
-        available = available_formats()
+        available = self.available_formats()
         for mime_type in mime_types:
 
             if mime_type not in available:
-                msg = "clipboard data not available in format '{}', skipping"
+                msg = "Clipboard data not available in format '{}', skipping"
                 _logger.debug(msg.format(mime_type))
                 continue
 
-            result = _get_data_single(mime_type)
+            result = self._get_data_single(mime_type)
             if result is not None:
                 return result
             else:
-                msg = ("failed to retrieve clipboard data in format '{}', "
+                msg = ("Failed to retrieve clipboard data in format '{}', "
                         "skipping")
                 _logger.warning(msg.format(mime_type))
 
-        msg = ("could not retrieve clipboard data in any of the specified "
+        msg = ("Could not retrieve clipboard data in any of the specified "
                 "formats")
         _logger.debug(msg)
         return None
@@ -67,6 +70,7 @@ class Clipboard(ABC):
     @abstractmethod
     def _set_data_single(self, mime_type, data):
         """Add data to the clipboard in a single format."""
+        pass
 
     def set_data(self, *data_items):
         """Set the clipboard data in one or more formats, with the most
@@ -75,23 +79,24 @@ class Clipboard(ABC):
         is a bytes object or string. Clears existing clipboard contents
         beforehand.
         """
-        clear()
+        self.clear()
         for data_item in data_items:
             if not isinstance(data_item, tuple):
-                msg = "argument is not a tuple: '{}'"
-                raise TypeError(msg.format(data_item))
+                msg = "Argument should be a tuple; got {} instead."
+                raise TypeError(msg.format(type(data_item).__name__))
 
             mime_type = data_item[0]
             if not isinstance(mime_type, str):
-                msg = "first tuple item is not a string: '{}'"
-                raise TypeError(msg.format(mime_type))
+                msg = "First tuple item should be a string; got {} instead."
+                raise TypeError(msg.format(type(mime_type).__name__))
 
             data = data_item[1]
             if not (isinstance(data, str) or isinstance(data, bytes)):
-                msg = "second tuple item is not a bytes object or string: '{}'"
-                raise TypeError(msg.format(data))
+                msg = ("Second tuple item should be a bytes object or string; "
+                        "got {} instead.")
+                raise TypeError(msg.format(type(data).__name__))
 
-            _set_data_single(mime_type, data)
+            self._set_data_single(mime_type, data)
 
     def save_state(self):
         """Return an object representing the current contents of the
@@ -101,11 +106,16 @@ class Clipboard(ABC):
         freed when the application loses ownership of the clipboard,
         unexpected behaviour may result.
         """
-        return [(f, _get_data_single(f)) for f in available_formats()]
+        data_items = []
+        for f in self.available_formats():
+            data = self._get_data_single(f)
+            if data is not None:
+                data_items.append((f, data))
+        return data_items
 
     def restore_state(self, state):
         """Restore the clipboard state from a clipboard state object
         previously returned by ``save_state``.
         """
-        set_data(*state)
+        self.set_data(*state)
 
