@@ -5,6 +5,7 @@ from wingman.clipboard import primary
 mime_plaintext = 'text/plain'
 mime_bytes = 'application/octet-stream'
 
+
 class TestClipboard(unittest.TestCase):
     def test_clear(self):
         primary.set_data((mime_plaintext, "Hello!"))
